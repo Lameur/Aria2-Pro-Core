@@ -1,8 +1,8 @@
-ARG BUILDER_IMAGE=debian:10
+ARG BUILDER_IMAGE=debian:12
 
 FROM $BUILDER_IMAGE AS builder
 
-WORKDIR /P3TERX/aria2-builder
+WORKDIR /Lameur/aria2-builder
 
 COPY . .
 
