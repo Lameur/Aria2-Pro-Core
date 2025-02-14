@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2020 P3TERX <https://p3terx.com>
+# Copyright (c) 2024 Lameur
 #
 # This is free software, licensed under the GNU General Public License v3.
 # See /LICENSE for more information.
@@ -27,16 +28,16 @@ jobs:
         PLATFORMS: [amd64, arm64, armhf, i386]
         include:
         - PLATFORMS: amd64
-          BUILDER_IMAGE: debian:11
+          BUILDER_IMAGE: debian:12
           BUILD_SCRIPT: aria2-gnu-linux-build-amd64.sh
         - PLATFORMS: arm64
-          BUILDER_IMAGE: debian:11
+          BUILDER_IMAGE: debian:12
           BUILD_SCRIPT: aria2-gnu-linux-cross-build-arm64.sh
         - PLATFORMS: armhf
-          BUILDER_IMAGE: ubuntu:16.04
+          BUILDER_IMAGE: debian:12
           BUILD_SCRIPT: aria2-gnu-linux-cross-build-armhf.sh
         - PLATFORMS: i386
-          BUILDER_IMAGE: debian:10
+          BUILDER_IMAGE: debian:12
           BUILD_SCRIPT: aria2-gnu-linux-cross-build-i386.sh
 
     steps:
@@ -45,7 +46,7 @@ jobs:
       run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Build
       env:
@@ -54,8 +55,8 @@ jobs:
         BUILD_SCRIPT: ${{ matrix.BUILD_SCRIPT }}
       run: |
         docker build \
-          --build-arg BUILDER_IMAGE \
-          --build-arg BUILD_SCRIPT \
+          --build-arg BUILDER_IMAGE=${{ matrix.BUILDER_IMAGE }} \
+          --build-arg BUILD_SCRIPT=${{ matrix.BUILD_SCRIPT }} \
           --platform=local \
           -o ./output . \
           2>&1 | tee build.log
@@ -71,15 +72,15 @@ jobs:
         ./aria2c -v 2>&1 | tee ./output/version-${{ matrix.PLATFORMS }}.txt
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: aria2-${{ matrix.PLATFORMS }}
         path: output
 
     - name: Functional Testing
       run: |
-        ./aria2c https://raw.githubusercontent.com/P3TERX/aria2.conf/master/dht.dat
-        ./aria2c https://raw.githubusercontent.com/P3TERX/aria2.conf/master/dht6.dat
+        ./aria2c https://raw.githubusercontent.com/Lameur/aria2.conf/master/dht.dat
+        ./aria2c https://raw.githubusercontent.com/Lameur/aria2.conf/master/dht6.dat
         ./aria2c \
           --seed-time=0 \
           --enable-dht6=true \
